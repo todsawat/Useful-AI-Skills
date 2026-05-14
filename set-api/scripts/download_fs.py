@@ -540,6 +540,15 @@ def cmd_financial(args):
                 print(f"    -> {len(files)} files: {os.path.basename(path)}")
                 results.append({"symbol": dl["symbol"], "headline": dl["headline"],
                                 "path": path, "files": files})
+                if args.read_content and os.path.isdir(path):
+                    for fname in sorted(os.listdir(path)):
+                        fpath = os.path.join(path, fname)
+                        content = read_file_content(fpath)
+                        if content:
+                            print(f"\n{'='*70}")
+                            print(f"FILE: {fname}  [{dl['symbol']} | {dl['headline']}]")
+                            print(f"{'='*70}")
+                            print(content)
             else:
                 print(f"    -> Failed (unknown format)")
         except Exception as e:
@@ -554,6 +563,63 @@ def cmd_financial(args):
             print(f"    - {f}")
 
     return results
+
+
+# ── File content readers ────────────────────────────────────────────────────
+
+def read_file_content(path):
+    """Read text content from xlsx, xls, docx, or doc file. Returns string or None."""
+    ext = os.path.splitext(path)[1].lower()
+
+    if ext == ".xlsx":
+        try:
+            import openpyxl
+            wb = openpyxl.load_workbook(path, data_only=True)
+            lines = []
+            for name in wb.sheetnames:
+                ws = wb[name]
+                lines.append(f"\n[Sheet: {name}]")
+                for row in ws.iter_rows(values_only=True):
+                    cells = [str(c) if c is not None else "" for c in row]
+                    if any(c.strip() for c in cells):
+                        lines.append("\t".join(cells))
+            return "\n".join(lines)
+        except ImportError:
+            return "[openpyxl not installed — pip install openpyxl]"
+        except Exception as e:
+            return f"[xlsx read error: {e}]"
+
+    elif ext == ".xls":
+        try:
+            import xlrd
+            wb = xlrd.open_workbook(path)
+            lines = []
+            for sheet in wb.sheets():
+                lines.append(f"\n[Sheet: {sheet.name}]")
+                for r in range(sheet.nrows):
+                    cells = [str(sheet.cell_value(r, c)) for c in range(sheet.ncols)]
+                    if any(c.strip() for c in cells):
+                        lines.append("\t".join(cells))
+            return "\n".join(lines)
+        except ImportError:
+            return "[xlrd not installed — pip install xlrd]"
+        except Exception as e:
+            return f"[xls read error: {e}]"
+
+    elif ext == ".docx":
+        try:
+            from docx import Document
+            doc = Document(path)
+            return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+        except ImportError:
+            return "[python-docx not installed — pip install python-docx]"
+        except Exception as e:
+            return f"[docx read error: {e}]"
+
+    elif ext == ".doc":
+        return "[.doc (binary Word 97-2003) not supported — convert to .docx first]"
+
+    return None
 
 
 # ── Mode: stock ────────────────────────────────────────────────────────────
@@ -584,6 +650,12 @@ STOCK_SECTIONS = {
         "label": "Major Shareholders",
         "endpoints": [
             "/api/set/stock/{symbol}/shareholder",
+        ],
+    },
+    "nvdr": {
+        "label": "NVDR Holdings",
+        "endpoints": [
+            "/api/set/stock/{symbol}/nvdr-holder",
         ],
     },
     "profile": {
@@ -935,6 +1007,8 @@ Examples:
     p_fin.add_argument("--limit", type=int, help="Max total downloads (used without --symbol)")
     p_fin.add_argument("--out", default=".", help="Output directory (default: .)")
     p_fin.add_argument("--list-only", action="store_true", help="List without downloading")
+    p_fin.add_argument("--read-content", action="store_true",
+                       help="After extracting ZIP, read and print content of xlsx/xls/docx files")
 
     # ── stock ──
     p_stock = sub.add_parser("stock", help="Stock information (price, shareholders, etc.)")

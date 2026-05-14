@@ -20,8 +20,10 @@ description: >
   "warrant", "ใบสำคัญแสดงสิทธิ", "วอร์แรนต์", "exercise price", "ราคาใช้สิทธิ",
   "รายงานประจำปี", "annual report", "56-1", "One Report", "ESG report",
   "กรรมการบริษัท", "board of directors",
+  "NVDR", "nvdr holder", "NVDR holding", "ผู้ถือ NVDR", "Thai NVDR",
+  "อ่านงบการเงิน", "read financial statements", "อ่านไฟล์งบ", "เปิดไฟล์ xlsx", "อ่าน docx",
   or any request to search Thai stock news, view stock data, check warrants, download
-  annual reports, or retrieve listed company filings from set.or.th.
+  annual reports, read financial statement files, or retrieve listed company filings from set.or.th.
 ---
 
 # SET News, Financial Statements & Stock Info
@@ -32,6 +34,9 @@ Search company news, download financial statements, and view stock information f
 
 - Python 3.7+
 - Node.js (for evaluating SET's __NUXT__ SSR data)
+- `openpyxl` — for reading `.xlsx` files (`pip install openpyxl`)
+- `xlrd` — for reading `.xls` files (`pip install xlrd`)
+- `python-docx` — for reading `.docx` files (`pip install python-docx`)
 
 ## Modes
 
@@ -95,9 +100,14 @@ python3 scripts/download_fs.py financial --symbol PTT --quarters 4 --list-only
 
 # All stocks on a date range, limit total downloads
 python3 scripts/download_fs.py financial --from-date 01/05/2026 --to-date 14/05/2026 --limit 20 --out ./output
+
+# Download and immediately read content of xlsx/docx files inside ZIP
+python3 scripts/download_fs.py financial --symbol BH --quarters 2 --out ./output --read-content
 ```
 
-**financial arguments:** `--symbol`, `--from-date DD/MM/YYYY`, `--to-date DD/MM/YYYY`, `--quarters` (per symbol, default 8), `--limit` (max total), `--out` (output dir), `--list-only`
+**financial arguments:** `--symbol`, `--from-date DD/MM/YYYY`, `--to-date DD/MM/YYYY`, `--quarters` (per symbol, default 8), `--limit` (max total), `--out` (output dir), `--list-only`, `--read-content` (extract and print content of xlsx/xls/docx after download)
+
+**Tip:** Use `--read-content` when you want Claude to analyze the financial data directly without opening files manually. Requires `openpyxl` (xlsx), `xlrd` (xls), and `python-docx` (docx).
 
 ### Mode: stock
 
@@ -127,7 +137,10 @@ python3 scripts/download_fs.py stock --symbol PTT --sections profile
 | `historical` | Daily OHLCV history | `/historical-trading` |
 | `rights` | XD/XR/XM corporate actions | `/corporate-action` |
 | `shareholders` | Major shareholders list | `/shareholder` |
+| `nvdr` | NVDR aggregate holding (% และ จำนวนหุ้น ถือโดย Thai NVDR Company) | `/nvdr-holder` |
 | `profile` | Company name, sector, key financial ratios | `/profile`, `/key-financial-data` |
+
+**Note on NVDR:** endpoint คืน aggregate holding ของ Thai NVDR Company — ไม่ใช่ชื่อนักลงทุนรายบุคคลที่ซื้อผ่าน NVDR (ข้อมูลระดับ investor ไม่เปิดเผยต่อสาธารณะ)
 
 **Tip:** Output is raw JSON — do NOT try to parse or format it in the script; read it directly as AI and extract the relevant information for the user.
 
@@ -190,4 +203,5 @@ python3 scripts/download_fs.py report --symbol BH --type one,esg --limit 3 --out
 - Without `--from-date`, single-stock mode defaults to last 3 years; all-stocks mode defaults to today.
 - Corrected filings (headline contains "แก้ไข") are automatically deduplicated — only the latest version is kept.
 - Each ZIP typically contains: `FINANCIAL_STATEMENTS.XLSX`, `AUDITOR_REPORT.DOCX`, `NOTES.DOCX`.
+- `--read-content` รองรับ `.xlsx`, `.xls`, `.docx` — ไม่รองรับ `.doc` (binary Word 97-2003)
 - For technical details on SET's API, see [references/set-api.md](references/set-api.md).
