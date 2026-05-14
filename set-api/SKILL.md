@@ -203,5 +203,5 @@ python3 scripts/download_fs.py report --symbol BH --type one,esg --limit 3 --out
 - Without `--from-date`, single-stock mode defaults to last 3 years; all-stocks mode defaults to today.
 - Corrected filings (headline contains "แก้ไข") are automatically deduplicated — only the latest version is kept.
 - Each ZIP typically contains: `FINANCIAL_STATEMENTS.XLSX`, `AUDITOR_REPORT.DOCX`, `NOTES.DOCX`.
-- `--read-content` รองรับ `.xlsx`, `.xls`, `.docx` — ไม่รองรับ `.doc` (binary Word 97-2003)
+- `--read-content` รองรับ `.xlsx` (openpyxl), `.xls` (xlrd), `.docx` (python-docx), `.doc` (ใช้ textutil/antiword/LibreOffice แล้วแต่ tool ที่ติดตั้งอยู่ — บน macOS ใช้ textutil ซึ่ง built-in อยู่แล้ว)
 - For technical details on SET's API, see [references/set-api.md](references/set-api.md).

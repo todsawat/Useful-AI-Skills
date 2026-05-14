@@ -617,7 +617,44 @@ def read_file_content(path):
             return f"[docx read error: {e}]"
 
     elif ext == ".doc":
-        return "[.doc (binary Word 97-2003) not supported — convert to .docx first]"
+        # Try external tools in order: textutil (macOS), antiword, LibreOffice
+        try:
+            result = subprocess.run(
+                ["textutil", "-convert", "txt", "-stdout", path],
+                capture_output=True, text=True, timeout=30,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout
+        except FileNotFoundError:
+            pass
+
+        try:
+            result = subprocess.run(
+                ["antiword", path],
+                capture_output=True, text=True, timeout=30,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout
+        except FileNotFoundError:
+            pass
+
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                subprocess.run(
+                    ["soffice", "--headless", "--convert-to", "txt:Text",
+                     "--outdir", tmpdir, path],
+                    capture_output=True, timeout=60,
+                )
+                txt_path = os.path.join(
+                    tmpdir, os.path.splitext(os.path.basename(path))[0] + ".txt"
+                )
+                if os.path.exists(txt_path):
+                    with open(txt_path, encoding="utf-8", errors="replace") as f:
+                        return f.read()
+        except FileNotFoundError:
+            pass
+
+        return "[.doc: ต้องการ textutil (macOS built-in), antiword (brew install antiword), หรือ LibreOffice]"
 
     return None
 
