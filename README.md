@@ -11,6 +11,30 @@
 - ข้อมูลวอร์แรนต์
 - รายงานประจำปี / 56-1 One Report / ESG Report
 
+## Installation
+
+### Claude Cowork (แนะนำ)
+
+อัปโหลดไฟล์ `set-financial-statements.skill` เข้า session ได้เลย — Claude จะโหลด skill โดยอัตโนมัติ
+
+### Claude Code (CLI) — ระดับ project
+
+```bash
+mkdir -p .claude/skills
+cp -r set-financial-statements .claude/skills/
+```
+
+จากนั้น Claude Code จะสามารถใช้ skill นี้ได้ทันทีใน project นั้น
+
+### Claude Code (CLI) — ระดับ global (ใช้ได้ทุก project)
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r set-financial-statements ~/.claude/skills/
+```
+
+---
+
 ## Requirements
 
 - Python 3.7+
