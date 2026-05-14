@@ -15,13 +15,13 @@
 
 ### Claude Cowork (แนะนำ)
 
-อัปโหลดไฟล์ `set-financial-statements.skill` เข้า session ได้เลย — Claude จะโหลด skill โดยอัตโนมัติ
+อัปโหลดไฟล์ `set-api.skill` เข้า session ได้เลย — Claude จะโหลด skill โดยอัตโนมัติ
 
 ### Claude Code (CLI) — ระดับ project
 
 ```bash
 mkdir -p .claude/skills
-cp -r set-financial-statements .claude/skills/
+cp -r set-api .claude/skills/
 ```
 
 จากนั้น Claude Code จะสามารถใช้ skill นี้ได้ทันทีใน project นั้น
@@ -30,7 +30,7 @@ cp -r set-financial-statements .claude/skills/
 
 ```bash
 mkdir -p ~/.claude/skills
-cp -r set-financial-statements ~/.claude/skills/
+cp -r set-api ~/.claude/skills/
 ```
 
 ---
@@ -82,7 +82,7 @@ python3 download_fs.py report --symbol BH --type one --out ./output
 ## Project Structure
 
 ```
-set-financial-statements/
+set-api/
 ├── SKILL.md              # คู่มือการใช้งาน skill
 ├── references/
 │   └── set-api.md        # เอกสาร SET API endpoints
