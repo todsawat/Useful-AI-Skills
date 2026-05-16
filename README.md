@@ -7,6 +7,7 @@
 | Skill | Description |
 |-------|-------------|
 | [SET-API Skill](./SET-API%20Skill/) | ดึงข้อมูลจากตลาดหลักทรัพย์แห่งประเทศไทย (SET) — ข่าว, งบการเงิน, ราคาหุ้น, NVDR, วอร์แรนต์, รายงานประจำปี |
+| [Youtube Transcript Skill](./Youtube%20Transcript%20Skill/) | ดึง transcript และคำบรรยายจาก YouTube วิดีโอ รองรับหลายภาษาและ timestamp |
 
 ## Installation
 
